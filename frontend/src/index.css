@@ -1,0 +1,13 @@
+:root {
+  --aqua: #25d0e8; /* ターコイズブルー */
+  --lavender: #a48bff; /* パープル */
+  --neon: #ff2e90; /* ピンクアクセント */
+  --ink: #111319; /* 文字用ダーク */
+}
+
+body {
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--aqua), var(--lavender));
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP",
+    sans-serif;
+}
