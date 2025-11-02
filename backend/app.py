@@ -1,4 +1,4 @@
-from flask_cors import CORS
+from flask_cors import CORS,cross_origin
 from flask import Flask,jsonify  
 from flask import render_template,request, redirect,flash
 import json  
@@ -9,7 +9,8 @@ import os
 import re  
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_folder='static', static_url_path='/static')  # Flaskアプリケーションのインスタンスを作成
-CORS(app)
+# Restrict CORS to the frontend origin used during development and avoid credentials when using '*'
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=False)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key')  
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASEDIR, 'recipes.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -42,11 +43,16 @@ print("EXISTS AFTER  :", os.path.exists(db_path))
 @app.route('/')  # ルートURL（ホーム）にアクセスしたときの処理
 def home():
     return render_template('index.html', recipes=[])    
-@app.route('/api/search', methods=['POST']) 
+@app.route('/api/search', methods=['POST', 'OPTIONS'])
+@cross_origin()
 def api_search_recipes():  
-    data = request.get_json()
-    query = request.form.get('query')  
-    if not query.strip():  
+    # Accept both JSON and form-encoded bodies
+    data = request.get_json(silent=True)
+    if data is None:
+        # fall back to form data (x-www-form-urlencoded)
+        data = request.form.to_dict()
+    query = (data.get('query') or '').strip()
+    if not query:
         return jsonify({"status": "error", "message": "キーワードを入力してください"})
     keywords = query.strip().lower().split() 
     filtered_recipes = Recipe.query 
@@ -72,14 +78,18 @@ def api_search_recipes():
         return jsonify({"status": "error", "message": "検索結果が見つかりませんでした"})  
     return jsonify({"status": "success", "data": recipes_dict, "count": len(recipes_dict)})  
 
-@app.route('/api/search_by_ingredients',methods=['POST'])  
+@app.route('/api/search_by_ingredients', methods=['POST', 'OPTIONS'])
+@cross_origin()
 def api_search_by_ingredients():  
-    data = request.get_json()
-    search_type = request.form.get('search_type') 
-    query = request.form.get('query')  
-    if not query.strip():  
-        return jsonify({"status": "error", "message": "キーワードを入力してください"})  
-    ingredients = query.strip().lower().split()  
+    # Accept both JSON and form-encoded bodies
+    data = request.get_json(silent=True)
+    if data is None:
+        data = request.form.to_dict()
+    search_type = data.get('search_type') or 'or'
+    query = (data.get('query') or '').strip()
+    if not query:
+        return jsonify({"status": "error", "message": "キーワードを入力してください"})
+    ingredients = query.lower().split()
     all_recipes = Recipe.query.all()  
     recipes_to_show = [] 
     for recipe in all_recipes: 
@@ -123,7 +133,8 @@ def api_search_by_ingredients():
         return jsonify({"status": "error", "message": "検索結果が見つかりませんでした"})  
     return jsonify({"status": "success", "data": recipes_dict, "count": len(recipes_dict)}) 
 
-@app.route('/api/recipes/<int:recipe_id>', methods=['GET']) 
+@app.route('/api/recipes/<int:recipe_id>', methods=['GET', 'OPTIONS'])
+@cross_origin()
 def api_show_recipe(recipe_id): 
     recipe = Recipe.query.get(recipe_id) 
     if not recipe:  
