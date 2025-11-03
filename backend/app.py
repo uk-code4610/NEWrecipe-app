@@ -154,16 +154,19 @@ def api_show_recipe(recipe_id):
 def new_recipe():
     return render_template('new_recipe.html')  
 
-@app.route('/admin/recipes',methods=['POST'])  
+@app.route('/admin/recipes', methods=['POST', 'OPTIONS'])  
+@cross_origin()
 def add_recipe():
-    title = request.form.get('title')
-    description = request.form.get('description')
-    image_url = request.form.get('image_url')
+    data = request.get_json()
+    title = data.get('title')
+    description = data.get('description')
+    image_url = data.get('image_url')
     if not image_url:
         image_url = "#"  
-    ingredients = request.form.get('ingredients').splitlines()  
-    steps = request.form.get('steps').splitlines()  
-    time_min = request.form.get('time_min') #
+    ingredients = data.get('ingredients')
+    steps = data.get('steps')
+    time_min = data.get('time_min')
+    
     new_recipe = Recipe(  
         title=title,
         description=description,
@@ -174,8 +177,8 @@ def add_recipe():
     )
     db.session.add(new_recipe)  
     db.session.commit()  
-    flash('新しいレシピが追加されました！')  
-    return redirect('/')  
+    
+    return jsonify({"status": "success", "message": "レシピが追加されました"})
 @app.route('/static/images/<path:filename>')
 def serve_image(filename):
     return send_from_directory('static/images', filename)
