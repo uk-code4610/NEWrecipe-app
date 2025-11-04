@@ -21,6 +21,21 @@ const App = () => {
   const [detailRecipe, setDetailRecipe] = useState("");
   const [currentView, setCurrentView] = useState("list");
   const [newRecipe, setNewRecipe] = useState(recipeFormat);
+  const [favorite, setFavorite] = useState([]);
+  const [favoriteRecipe, setFavoriteRecipe] = useState([]);
+  useEffect(() => {
+    if (currentView !== "favoriteList") return;
+    Promise.all(
+      favorite.map(async (id) => {
+        const response = await fetch(`http://127.0.0.1:5000/api/recipes/${id}`);
+        const data = await response.json();
+        return data.data;
+      })
+    ).then((recipes) => {
+      setFavoriteRecipe(recipes);
+    });
+  }, [currentView]);
+
   const changeRecipe = (e) => {
     setRecipe(e.target.value);
   };
@@ -72,6 +87,7 @@ const App = () => {
       })
       .then((data) => {
         setSearchResults(data.data || []);
+        setCurrentView("list");
       })
       .catch((err) => {
         console.error("fetch error:", err);
@@ -98,6 +114,7 @@ const App = () => {
       })
       .then((data) => {
         setSearchResults(data.data || []);
+        setCurrentView("list");
       })
       .catch((err) => {
         console.error("fetch error:", err);
@@ -148,6 +165,27 @@ const App = () => {
         });
     }
   };
+  useEffect(() => {
+    const localFavorites = localStorage.getItem("favorites");
+    if (localFavorites) {
+      setFavorite(JSON.parse(localFavorites));
+    }
+  }, []);
+
+  const addFavorites = (id) => {
+    if (!favorite.includes(id)) {
+      const newList = [...favorite, id];
+      setFavorite(newList);
+      localStorage.setItem("favorites", JSON.stringify(newList));
+    }
+  };
+
+  const deleteFavorites = (id) => {
+    const deleteId = favorite.filter((ID) => ID !== id);
+    setFavorite(deleteId);
+    localStorage.setItem("favorites", JSON.stringify(deleteId));
+  };
+
   return (
     <>
       <header className="site-header">
@@ -160,7 +198,12 @@ const App = () => {
           </span>
         </h1>
       </header>
-
+      <button
+        className="favorite-button"
+        onClick={() => setCurrentView("favoriteList")}
+      >
+        お気に入り
+      </button>
       <div className="search-form">
         <input
           type="text"
@@ -200,10 +243,46 @@ const App = () => {
           </option>
         ))}
       </select>
+      {currentView === "favoriteList" && (
+        <div className="recipe-list">
+          {favoriteRecipe.length === 0
+            ? "お気に入りが登録されていません"
+            : favoriteRecipe.map((favorite) => (
+                <div
+                  className="recipe-item"
+                  key={favorite.id}
+                  onClick={() => {
+                    setRecipeId(favorite.id);
+                    setCurrentView("detail");
+                  }}
+                >
+                  <h3>{favorite.title}</h3>
+                  <img src={favorite.image_url} alt={favorite.title} />
+                  <p>{favorite.description}</p>
+                  <p>調理時間目安:{favorite.time_min}分</p>
+                </div>
+              ))}
+        </div>
+      )}
       {currentView === "detail" && (
         <div className="recipe-detail">
           <div className="left">
-            <h3>{detailRecipe.title}</h3>
+            <div className="detail-header">
+              <h3>{detailRecipe.title}</h3>
+
+              <span
+                className="favorite-icon"
+                onClick={() => {
+                  if (favorite.includes(detailRecipe.id)) {
+                    deleteFavorites(detailRecipe.id);
+                  } else {
+                    addFavorites(detailRecipe.id);
+                  }
+                }}
+              >
+                {favorite.includes(detailRecipe.id) ? "★" : "☆"}
+              </span>
+            </div>
             <img src={detailRecipe.image_url} alt={detailRecipe.title} />
             <p>{detailRecipe.description}</p>
             <p className="time">調理時間目安: {detailRecipe.time_min}分</p>

@@ -179,6 +179,8 @@ def add_recipe():
     db.session.commit()  
     
     return jsonify({"status": "success", "message": "レシピが追加されました"})
+
+
 @app.route('/static/images/<path:filename>')
 def serve_image(filename):
     return send_from_directory('static/images', filename)

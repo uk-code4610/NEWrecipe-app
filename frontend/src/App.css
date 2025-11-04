@@ -200,3 +200,32 @@ button:hover {
   padding: 14px;
   font-size: 18px;
 }
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.favorite-icon {
+  font-size: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+.favorite-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--neon);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.favorite-button:hover {
+  background-color: var(--lavender);
+}
