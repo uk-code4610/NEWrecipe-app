@@ -10,7 +10,10 @@ import re
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_folder='static', static_url_path='/static')  # Flaskアプリケーションのインスタンスを作成
 # Restrict CORS to the frontend origin used during development and avoid credentials when using '*'
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=False)
+CORS(app, resources={
+    r"/api/*": {"origins": "http://localhost:5173"},
+    r"/admin/*": {"origins": "http://localhost:5173"}
+}, supports_credentials=False)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key')  
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(BASEDIR, 'recipes.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -24,8 +27,12 @@ class Recipe(db.Model):  # SQLAlchemyのモデルクラスを定義
     image_url = db.Column(db.String(200), nullable=True)  
     ingredients = db.Column(db.PickleType, nullable=False)  
     steps = db.Column(db.PickleType, nullable=False) 
-    time_min = db.Column(db.Integer, nullable=True)     
+    time_min = db.Column(db.Integer, nullable=True)
 
+class User(db.Model): # ログインモデル定義
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(50),nullable=False)
+    password_hash = db.Column(db.String(300),nullable=False)   
 from sqlalchemy import text
 
 db_path = os.path.join(BASEDIR, 'recipes.db')
@@ -42,7 +49,8 @@ print("EXISTS AFTER  :", os.path.exists(db_path))
 
 @app.route('/')  # ルートURL（ホーム）にアクセスしたときの処理
 def home():
-    return render_template('index.html', recipes=[])    
+    return render_template('index.html', recipes=[])
+
 @app.route('/api/search', methods=['POST', 'OPTIONS'])
 @cross_origin()
 def api_search_recipes():  
@@ -150,23 +158,40 @@ def api_show_recipe(recipe_id):
     }
     return jsonify({"status": "success", "data": recipe_dict})  
 
-@app.route('/admin/recipes/new',methods=['GET']) 
-def new_recipe():
-    return render_template('new_recipe.html')  
-
-@app.route('/admin/recipes', methods=['POST', 'OPTIONS'])  
+@app.route('/admin/recipes',methods=['POST'])  
 @cross_origin()
 def add_recipe():
-    data = request.get_json()
-    title = data.get('title')
-    description = data.get('description')
-    image_url = data.get('image_url')
-    if not image_url:
-        image_url = "#"  
-    ingredients = data.get('ingredients')
-    steps = data.get('steps')
-    time_min = data.get('time_min')
-    
+    # Accept JSON or form-encoded submissions
+    data = request.get_json(silent=True)
+    if data is None:
+        form = request.form
+        title = form.get('title')
+        description = form.get('description')
+        image_url = form.get('image_url') or "#"
+        ingredients_raw = form.get('ingredients') or ""
+        steps_raw = form.get('steps') or ""
+        ingredients = ingredients_raw.splitlines() if isinstance(ingredients_raw, str) else ingredients_raw
+        steps = steps_raw.splitlines() if isinstance(steps_raw, str) else steps_raw
+        time_min = form.get('time_min')
+    else:
+        title = data.get('title')
+        description = data.get('description')
+        image_url = data.get('image_url') or "#"
+        ingredients = data.get('ingredients') or []
+        steps = data.get('steps') or []
+        # normalize strings to lists
+        if isinstance(ingredients, str):
+            ingredients = ingredients.splitlines()
+        if isinstance(steps, str):
+            steps = steps.splitlines()
+        time_min = data.get('time_min')
+
+    # normalize time_min to int or None
+    try:
+        time_min = int(time_min) if time_min not in (None, "") else None
+    except (ValueError, TypeError):
+        time_min = None
+
     new_recipe = Recipe(  
         title=title,
         description=description,
@@ -176,9 +201,14 @@ def add_recipe():
         time_min=time_min
     )
     db.session.add(new_recipe)  
-    db.session.commit()  
-    
-    return jsonify({"status": "success", "message": "レシピが追加されました"})
+    db.session.commit()
+
+    # If client sent JSON, return JSON response. If form, redirect (legacy behavior).
+    if data is not None:
+        return jsonify({"status": "success", "id": new_recipe.id})
+    else:
+        flash('新しいレシピが追加されました！')  
+        return redirect('/')  
 
 
 @app.route('/static/images/<path:filename>')

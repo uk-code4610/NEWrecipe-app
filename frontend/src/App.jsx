@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-const reorders = ["並び替え:デフォルト", "並び替え:調理期間の短い順"];
+import Header from "./components/Header";
+import SearchRecipeForm from "./components/SearchRecipeForm";
+import SearchIngredientForm from "./components/SearchIngredientForm";
+import RecipeList from "./views/RecipeList";
+import RecipeDetail from "./views/RecipeDetail";
+import FavoriteList from "./views/FavoriteList";
+import ShoppingList from "./views/ShoppingList";
+import NewRecipeForm from "./views/NewRecipeForm";
 const searchType = ["AND検索", "OR検索"];
+const reorders = ["並び替え:デフォルト", "並び替え:調理期間の短い順"];
 const recipeFormat = {
   title: "",
   description: "",
@@ -14,7 +22,6 @@ const App = () => {
   const [recipe, setRecipe] = useState("");
   const [ingredient, setIngredient] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [searchTypeValue, setSerchTypeValue] = useState("AND検索");
   const [doSearch, setDosearch] = useState(false);
   const [doReorder, setDoReorder] = useState("並び替え:デフォルト");
   const [recipeId, setRecipeId] = useState("");
@@ -23,6 +30,9 @@ const App = () => {
   const [newRecipe, setNewRecipe] = useState(recipeFormat);
   const [favorite, setFavorite] = useState([]);
   const [favoriteRecipe, setFavoriteRecipe] = useState([]);
+  const [shoppingList, setShoppingList] = useState([]);
+  const [checkItems, setCheckItem] = useState([]);
+  const [searchTypeValue, setSerchTypeValue] = useState("AND検索");
   useEffect(() => {
     if (currentView !== "favoriteList") return;
     Promise.all(
@@ -42,7 +52,7 @@ const App = () => {
   const changeIngredients = (e) => {
     setIngredient(e.target.value);
   };
-  const changeSerch = (e) => {
+  const changeSearch = (e) => {
     setSerchTypeValue(e.target.value);
   };
   const changeOrder = (e) => {
@@ -95,7 +105,7 @@ const App = () => {
       });
   };
 
-  const serchIngredients = () => {
+  const searchIngredients = () => {
     setDosearch(true);
     const searchTypeForApi = searchTypeValue === "AND検索" ? "and" : "or";
     fetch("http://127.0.0.1:5000/api/search_by_ingredients", {
@@ -120,26 +130,6 @@ const App = () => {
         console.error("fetch error:", err);
         setSearchResults([]);
       });
-  };
-  const newTitle = (e) => {
-    setNewRecipe({ ...newRecipe, title: e.target.value });
-  };
-  const newDescription = (e) => {
-    setNewRecipe({ ...newRecipe, description: e.target.value });
-  };
-  const newImage = (e) => {
-    setNewRecipe({ ...newRecipe, image_url: e.target.value });
-  };
-  const newTime = (e) => {
-    setNewRecipe({ ...newRecipe, time_min: e.target.value });
-  };
-  const newIngredients = (e) => {
-    const ingredientsArray = e.target.value.split("\n");
-    setNewRecipe({ ...newRecipe, ingredients: ingredientsArray });
-  };
-  const newStep = (e) => {
-    const stepArray = e.target.value.split("\n");
-    setNewRecipe({ ...newRecipe, steps: stepArray });
   };
 
   const addNewRecipe = () => {
@@ -171,6 +161,12 @@ const App = () => {
       setFavorite(JSON.parse(localFavorites));
     }
   }, []);
+  useEffect(() => {
+    const localShopping = localStorage.getItem("shopping");
+    if (localShopping) {
+      setShoppingList(JSON.parse(localShopping));
+    }
+  }, []);
 
   const addFavorites = (id) => {
     if (!favorite.includes(id)) {
@@ -185,55 +181,42 @@ const App = () => {
     setFavorite(deleteId);
     localStorage.setItem("favorites", JSON.stringify(deleteId));
   };
-
+  const addList = (ListIngredients) => {
+    const getList = localStorage.getItem("shopping");
+    const newList = [...JSON.parse(getList), ...ListIngredients];
+    setShoppingList(newList);
+    localStorage.setItem("shopping", JSON.stringify(newList));
+  };
+  const checkItem = (shoppingItem) => {
+    if (checkItems.includes(shoppingItem)) {
+      const deleteItem = checkItems.filter((Item) => Item !== shoppingItem);
+      setCheckItem(deleteItem);
+    } else {
+      setCheckItem([...checkItems, shoppingItem]);
+    }
+  };
+  const clearShoppingList = () => {
+    setShoppingList([]);
+  };
   return (
     <>
-      <header className="site-header">
-        <h1 className="brand">
-          <img src="/afro_logo.svg" alt="AfroLogo" className="afro-logo" />
-          <span className="brand-text">
-            Afro
-            <br />
-            Kitchen
-          </span>
-        </h1>
-      </header>
-      <button
-        className="favorite-button"
-        onClick={() => setCurrentView("favoriteList")}
-      >
-        お気に入り
-      </button>
-      <div className="search-form">
-        <input
-          type="text"
-          placeholder="レシピを検索"
-          value={recipe}
-          onChange={changeRecipe}
-        />
-        <button onClick={searchRecipes}>
-          <i className="fas fa-search"></i>
-        </button>
-      </div>
-      <div className="search-form">
-        <input
-          type="text"
-          placeholder="材料を検索"
-          value={ingredient}
-          onChange={changeIngredients}
-        />
-        <button onClick={serchIngredients}>
-          <i className="fas fa-search"></i>
-        </button>
-        <select value={searchTypeValue} onChange={changeSerch}>
-          {searchType.map((search) => (
-            <option key={search} value={search}>
-              {search}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button onClick={() => setCurrentView("new")}>新規レシピ作成</button>
+      <Header setCurrentView={setCurrentView} />
+      <SearchRecipeForm
+        recipe={recipe}
+        changeRecipe={changeRecipe}
+        searchRecipes={searchRecipes}
+        doSearch={doSearch}
+      />
+
+      <SearchIngredientForm
+        ingredient={ingredient}
+        changeIngredients={changeIngredients}
+        searchIngredients={searchIngredients}
+        changeSearch={changeSearch}
+        searchType={searchType}
+        searchTypeValue={searchTypeValue}
+      />
+
       <hr />
 
       <select value={doReorder} onChange={changeOrder}>
@@ -243,136 +226,44 @@ const App = () => {
           </option>
         ))}
       </select>
+      {currentView === "shoppingList" && (
+        <ShoppingList
+          shoppingList={shoppingList}
+          checkItems={checkItem}
+          clearShoppingList={clearShoppingList}
+          checkItem={checkItem}
+        />
+      )}
       {currentView === "favoriteList" && (
-        <div className="recipe-list">
-          {favoriteRecipe.length === 0
-            ? "お気に入りが登録されていません"
-            : favoriteRecipe.map((favorite) => (
-                <div
-                  className="recipe-item"
-                  key={favorite.id}
-                  onClick={() => {
-                    setRecipeId(favorite.id);
-                    setCurrentView("detail");
-                  }}
-                >
-                  <h3>{favorite.title}</h3>
-                  <img src={favorite.image_url} alt={favorite.title} />
-                  <p>{favorite.description}</p>
-                  <p>調理時間目安:{favorite.time_min}分</p>
-                </div>
-              ))}
-        </div>
+        <FavoriteList
+          favoriteRecipe={favoriteRecipe}
+          setRecipeId={setRecipeId}
+          setCurrentView={setCurrentView}
+        />
       )}
       {currentView === "detail" && (
-        <div className="recipe-detail">
-          <div className="left">
-            <div className="detail-header">
-              <h3>{detailRecipe.title}</h3>
-
-              <span
-                className="favorite-icon"
-                onClick={() => {
-                  if (favorite.includes(detailRecipe.id)) {
-                    deleteFavorites(detailRecipe.id);
-                  } else {
-                    addFavorites(detailRecipe.id);
-                  }
-                }}
-              >
-                {favorite.includes(detailRecipe.id) ? "★" : "☆"}
-              </span>
-            </div>
-            <img src={detailRecipe.image_url} alt={detailRecipe.title} />
-            <p>{detailRecipe.description}</p>
-            <p className="time">調理時間目安: {detailRecipe.time_min}分</p>
-          </div>
-          <div className="right">
-            <h2>材料:</h2>
-            <ul>
-              {detailRecipe.ingredients &&
-                detailRecipe.ingredients.map((ing, index) => (
-                  <li key={index}>{ing}</li>
-                ))}
-            </ul>
-            <h2>作り方:</h2>
-            <ol>
-              {detailRecipe.steps &&
-                detailRecipe.steps.map((step, index) => (
-                  <li key={index}>{step}</li>
-                ))}
-            </ol>
-            <button onClick={() => setCurrentView("list")}>閉じる</button>
-          </div>
-        </div>
+        <RecipeDetail
+          detailRecipe={detailRecipe}
+          favorite={favorite}
+          deleteFavorites={deleteFavorites}
+          addFavorites={addFavorites}
+          addList={addList}
+          setCurrentView={setCurrentView}
+        />
       )}
       {currentView === "list" && (
-        <div className="recipe-list">
-          {searchResults.length > 0
-            ? searchResults.map((result) => (
-                <div
-                  className="recipe-item"
-                  key={result.id}
-                  onClick={() => {
-                    setRecipeId(result.id);
-                    setCurrentView("detail");
-                  }}
-                >
-                  <h3>{result.title}</h3>
-                  <img src={result.image_url} alt={result.title} />
-                  <p>{result.description}</p>
-                  <p>調理時間目安:{result.time_min}分</p>
-                </div>
-              ))
-            : doSearch && "レシピが見つかりませんでした"}
-        </div>
+        <RecipeList
+          searchResults={searchResults}
+          setRecipeId={setRecipeId}
+          setCurrentView={setCurrentView}
+        />
       )}
       {currentView === "new" && (
-        <div className="new-recipe-form">
-          <h3>
-            タイトル:{" "}
-            <input type="text" value={newRecipe.title} onChange={newTitle} />
-          </h3>
-          <h3>
-            説明:{" "}
-            <textarea value={newRecipe.description} onChange={newDescription} />
-          </h3>
-          <h3>
-            画像URL:{" "}
-            <input type="url" value={newRecipe.image_url} onChange={newImage} />
-          </h3>
-          <h3>
-            調理時間(分):
-            <input
-              type="number"
-              value={newRecipe.time_min}
-              onChange={newTime}
-            />
-          </h3>
-          <h3>
-            材料 (1行ごとに入力):
-            <textarea
-              value={
-                Array.isArray(newRecipe.ingredients)
-                  ? newRecipe.ingredients.join("\n")
-                  : newRecipe.ingredients
-              }
-              onChange={newIngredients}
-            />
-          </h3>
-          <h3>
-            作り方 (1行ごとに入力):
-            <textarea
-              value={
-                Array.isArray(newRecipe.steps)
-                  ? newRecipe.steps.join("\n")
-                  : newRecipe.steps
-              }
-              onChange={newStep}
-            />
-          </h3>
-          <button onClick={addNewRecipe}>レシピを追加</button>
-        </div>
+        <NewRecipeForm
+          newRecipe={newRecipe}
+          setNewRecipe={setNewRecipe}
+          addNewRecipe={addNewRecipe}
+        />
       )}
     </>
   );
