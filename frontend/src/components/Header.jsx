@@ -1,5 +1,7 @@
 import "../App.css";
-const Header = ({ setCurrentView }) => {
+import { useView } from "../Context/ViewContext";
+const Header = () => {
+  const { setCurrentView } = useView();
   return (
     <>
       <header className="site-header">
