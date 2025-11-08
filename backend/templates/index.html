@@ -8,47 +8,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- レスポンシブ対応。スマホでも見やすくする -->
     <title>レシピ検索</title>
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='images/favicon.svg') }}"
+      type="image/svg+xml"
+    />
     <!-- ブラウザのタブに表示されるタイトル -->
-   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
   </head>
   <body>
     <header class="site-header">
-  <h1 class="brand">
-    <img src="{{ url_for('static', filename='images/afro_logo.svg') }}" alt="Afro Logo" class="afro-logo">
-    <span class="brand-text">
-    Afro<br>Kitchen
-    </span>
-  </h1>
-</header>
+      <h1 class="brand">
+        <img
+          src="{{ url_for('static', filename='images/afro_logo.svg') }}"
+          alt="Afro Logo"
+          class="afro-logo"
+        />
+        <span class="brand-text"> Afro<br />Kitchen </span>
+      </h1>
+    </header>
     <form id="search-name-form" class="search-form">
-      <input type="text" name="query" placeholder="レシピを検索" id="search-name-input" />
+      <input
+        type="text"
+        name="query"
+        placeholder="レシピを検索"
+        id="search-name-input"
+      />
       <button type="submit"><i class="fas fa-search"></i></button>
     </form>
 
     <form id="search-ingredients-form" class="search-form">
       <!-- 材料名で検索するフォーム。/search_by_ingredientsにPOST送信 -->
-      <input type="text" name="query" placeholder="材料を検索" id="search-ingredients-input" />
+      <input
+        type="text"
+        name="query"
+        placeholder="材料を検索"
+        id="search-ingredients-input"
+      />
       <!-- 材料キーワード入力欄 -->
       <button type="submit"><i class="fas fa-search"></i></button>
       <!-- 検索ボタン -->
       <select name="search_type" id="search-type-select">
-      <option value="and">AND検索</option>
-      <option value="or">OR検索</option>
+        <option value="and">AND検索</option>
+        <option value="or">OR検索</option>
       </select>
     </form>
     <a href="/admin/recipes/new">新規レシピ作成</a>
     <!-- 新規レシピ作成ページへのリンク -->
     <hr />
-      <select id="sort-select">
-        <option value="default">並び替え: デフォルト</option>
-        <option value="time_asc">並び替え: 調理時間が短い順</option>
-      </select>
+    <select id="sort-select">
+      <option value="default">並び替え: デフォルト</option>
+      <option value="time_asc">並び替え: 調理時間が短い順</option>
+    </select>
     <!-- 水平線。コンテンツの区切り -->
     <div class="recipe-list" id="search-results-container"></div>
     <script src="/static/js/main.js"></script>
-
   </body>
 </html>
