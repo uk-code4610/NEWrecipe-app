@@ -1,4 +1,5 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
 type ViewContextType = {
   currentView: string;
   setCurrentView: (currentView: string) => void;
@@ -17,7 +18,15 @@ const useView = () => {
 };
 
 const ViewProvider = ({ children }: ViewProviderProps) => {
-  const [currentView, setCurrentView] = useState("list");
+  const [currentView, setCurrentView] = useState("register");
+  useEffect(() => {
+    const firstLogin = localStorage.getItem("has_account");
+    if (firstLogin) {
+      setCurrentView("login");
+    } else {
+      setCurrentView("register");
+    }
+  }, []);
   return (
     <ViewContext.Provider value={{ currentView, setCurrentView }}>
       {children}

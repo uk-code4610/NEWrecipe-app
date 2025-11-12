@@ -7,8 +7,11 @@ from sqlalchemy import or_, and_
 from flask import send_from_directory
 import os 
 import re  
+from datetime import datetime
+from flask_bcrypt import Bcrypt
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__, static_folder='static', static_url_path='/static')  # Flaskアプリケーションのインスタンスを作成
+Bcrypt = Bcrypt(app)
 # Restrict CORS to the frontend origin used during development and avoid credentials when using '*'
 CORS(app, resources={
     r"/api/*": {"origins": "http://localhost:5173"},
@@ -31,8 +34,9 @@ class Recipe(db.Model):  # SQLAlchemyのモデルクラスを定義
 
 class User(db.Model): # ログインモデル定義
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50),nullable=False)
+    username = db.Column(db.String(50),unique=True,nullable=False)
     password_hash = db.Column(db.String(300),nullable=False)   
+    created_at = db.Column(db.DateTime,default=datetime.utcnow)
 from sqlalchemy import text
 
 db_path = os.path.join(BASEDIR, 'recipes.db')
@@ -214,6 +218,34 @@ def add_recipe():
 @app.route('/static/images/<path:filename>')
 def serve_image(filename):
     return send_from_directory('static/images', filename)
+
+@app.route('/api/register',methods=['POST'])
+@cross_origin()
+def register():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user is not None:
+        return jsonify({"status":"error","message":"ユーザー名は既に存在します"})
+    password_hash = Bcrypt.generate_password_hash(password).decode('utf-8')
+    new_user = User(username=username,password_hash=password_hash)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"status":"success","message":"ユーザー登録が完了しました"})
+
+@app.route('/api/login',methods=['POST'])
+@cross_origin()
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    user = User.query.filter_by(username=username).first()
+    if user is None or not Bcrypt.check_password_hash(user.password_hash,password):
+        return jsonify({"status":"error","message":"無効なユーザー名またはパスワード"})
+    return jsonify({"status":"success","message":"ログインに成功しました"})
+
+    
+    
+
 
 if __name__ == "__main__":
     with app.app_context():  
