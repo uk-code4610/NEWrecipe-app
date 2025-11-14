@@ -17,7 +17,7 @@ const SearchIngredientForm = () => {
   const searchIngredients = () => {
     setDosearch(true);
     const searchTypeForApi = searchTypeValue === "AND検索" ? "and" : "or";
-    fetch("http://127.0.0.1:5001/api/search_by_ingredients", {
+    fetch("https://new-afro-kitchen.onrender.com/api/search_by_ingredients", {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "application/json" },

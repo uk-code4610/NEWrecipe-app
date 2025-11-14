@@ -19,7 +19,7 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
       setMessage("入力してください");
       return;
     }
-    fetch("http://127.0.0.1:5001/api/login", {
+    fetch("https://new-afro-kitchen.onrender.com/api/login", {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "application/json" },

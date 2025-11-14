@@ -11,7 +11,7 @@ const SearchRecipeForm = () => {
   };
   const searchRecipes = () => {
     setDosearch(true);
-    fetch("http://127.0.0.1:5001/api/search", {
+    fetch("https://new-afro-kitchen.onrender.com/api/search", {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "application/json" },

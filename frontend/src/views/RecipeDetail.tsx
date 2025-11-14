@@ -23,7 +23,7 @@ const RecipeDetail = () => {
 
   useEffect(() => {
     if (!recipeId) return;
-    fetch(`http://127.0.0.1:5001/api/recipes/${recipeId}`, {
+    fetch(`https://new-afro-kitchen.onrender.com/api/recipes/${recipeId}`, {
       method: "GET",
       mode: "cors",
       headers: { "Content-Type": "application/json" },
@@ -45,13 +45,27 @@ const RecipeDetail = () => {
   useEffect(() => {
     if (currentView !== "favoriteList") return;
     Promise.all(
-      favorite.map(async (id) => {
-        const response = await fetch(`http://127.0.0.1:5001/api/recipes/${id}`);
-        const data = await response.json();
-        return data.data;
+      (Array.isArray(favorite) ? favorite : []).map(async (id) => {
+        if (id == null) return null;
+        try {
+          const response = await fetch(
+            `https://new-afro-kitchen.onrender.com/api/recipes/${id}`,
+            {
+              method: "GET",
+              mode: "cors",
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+          if (!response.ok) return null;
+          const data = await response.json();
+          return data?.data ?? null;
+        } catch (err) {
+          console.warn("Failed to fetch favorite recipe", id, err);
+          return null;
+        }
       })
     ).then((recipes) => {
-      setFavoriteRecipe(recipes);
+      setFavoriteRecipe((recipes || []).filter(Boolean));
     });
   }, [currentView]);
 

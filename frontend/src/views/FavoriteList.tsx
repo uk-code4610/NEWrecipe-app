@@ -15,7 +15,7 @@ const FavoriteList = () => {
         if (id == null) return null;
         try {
           const response = await fetch(
-            `http://127.0.0.1:5001/api/recipes/${id}`
+            `https://new-afro-kitchen.onrender.com/api/recipes/${id}`
           );
           if (!response.ok) return null;
           const data = await response.json();

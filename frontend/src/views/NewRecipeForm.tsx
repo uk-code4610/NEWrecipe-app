@@ -23,7 +23,7 @@ const NewRecipeForm = () => {
     ) {
       alert("空欄があります");
     } else {
-      fetch("http://127.0.0.1:5001/admin/recipes", {
+      fetch("https://new-afro-kitchen.onrender.com/admin/recipes", {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "application/json" },

@@ -17,7 +17,7 @@ const RegisterForm = () => {
       setMessage("未入力があります");
       return;
     }
-    fetch("http://127.0.0.1:5001/api/register", {
+    fetch("https://new-afro-kitchen.onrender.com/api/register", {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "application/json" },
