@@ -11,14 +11,7 @@ app = Flask(
 )  # Flaskアプリケーションのインスタンスを作成
 
 
-CORS(
-    app,
-    resources={
-        r"/api/*": {"origins": "http://localhost:5173"},
-        r"/admin/*": {"origins": "http://localhost:5173"},
-    },
-    supports_credentials=False,
-)
+CORS(app)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"sqlite:///{os.path.join(BASEDIR, 'recipes.db')}"
