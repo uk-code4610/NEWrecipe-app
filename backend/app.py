@@ -1,6 +1,5 @@
 from flask_cors import CORS
 from flask import Flask
-from flask import render_template
 from flask import send_from_directory
 import os
 
@@ -26,6 +25,11 @@ print("DB PATH       :", db_path)
 print("EXISTS BEFORE :", os.path.exists(db_path))
 
 print("EXISTS AFTER  :", os.path.exists(db_path))
+
+
+@app.route("/")
+def home():
+    return {"message": "Afro Kitchen API", "status": "running"}
 
 
 @app.route("/static/images/<path:filename>")
