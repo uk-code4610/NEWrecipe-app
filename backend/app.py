@@ -57,6 +57,10 @@ from routes.detail_recipe import detail_bp
 
 app.register_blueprint(detail_bp)
 
+from routes.add_recipe import add_recipe_bp
+
+app.register_blueprint(add_recipe_bp)
+
 from extensions import db, bcrypt
 
 db.init_app(app)

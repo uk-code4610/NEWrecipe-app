@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 from models import Recipe
-from app import db
+from extensions import db
 
 add_recipe_bp = Blueprint("add_recipe", __name__)
 

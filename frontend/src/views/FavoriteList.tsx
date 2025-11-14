@@ -11,13 +11,23 @@ const FavoriteList = () => {
   useEffect(() => {
     if (currentView !== "favoriteList") return;
     Promise.all(
-      favorite.map(async (id) => {
-        const response = await fetch(`http://127.0.0.1:5001/api/recipes/${id}`);
-        const data = await response.json();
-        return data.data;
+      (Array.isArray(favorite) ? favorite : []).map(async (id) => {
+        if (id == null) return null;
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:5001/api/recipes/${id}`
+          );
+          if (!response.ok) return null;
+          const data = await response.json();
+          return data?.data ?? null;
+        } catch (err) {
+          console.warn("Failed to fetch favorite recipe", id, err);
+          return null;
+        }
       })
     ).then((recipes) => {
-      setFavoriteRecipe(recipes);
+      // filter out any null/undefined entries from failed fetches
+      setFavoriteRecipe((recipes || []).filter(Boolean));
     });
   }, [currentView]);
   useEffect(() => {
@@ -30,21 +40,25 @@ const FavoriteList = () => {
     <>
       {currentView === "favoriteList" && (
         <div className="recipe-list">
-          {favoriteRecipe.length === 0
-            ? "お気に入りが登録されていません"
-            : favoriteRecipe.map((favorite) => (
+          {(!Array.isArray(favoriteRecipe) || favoriteRecipe.length === 0) &&
+            "お気に入りが登録されていません"}
+          {Array.isArray(favoriteRecipe) &&
+            favoriteRecipe.length > 0 &&
+            favoriteRecipe
+              .filter((r) => r && typeof r.title === "string")
+              .map((fav, idx) => (
                 <div
                   className="recipe-item"
-                  key={favorite.id}
+                  key={fav.id ?? idx}
                   onClick={() => {
-                    setRecipeId(favorite.id);
+                    setRecipeId(fav.id);
                     setCurrentView("detail");
                   }}
                 >
-                  <h3>{favorite.title}</h3>
-                  <img src={favorite.image_url} alt={favorite.title} />
-                  <p>{favorite.description}</p>
-                  <p>調理時間目安:{favorite.time_min}分</p>
+                  <h3>{fav.title}</h3>
+                  {fav.image_url && <img src={fav.image_url} alt={fav.title} />}
+                  <p>{fav.description}</p>
+                  <p>調理時間目安:{fav.time_min}分</p>
                 </div>
               ))}
         </div>
