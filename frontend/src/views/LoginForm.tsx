@@ -67,6 +67,10 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
             onChange={changePass}
           />
           <button onClick={loginBtn}>ログイン</button>
+          <div className="to-Register">
+            <h3>アカウントをお持ちではないですか？</h3>
+            <p onClick={() => setCurrentView("register")}>新規登録する</p>
+          </div>
         </div>
       )}
     </>

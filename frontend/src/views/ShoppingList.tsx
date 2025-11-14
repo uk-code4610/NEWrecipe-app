@@ -24,6 +24,7 @@ const ShoppingList = () => {
   };
   const clearShoppingList = () => {
     setShoppingList([]);
+    localStorage.removeItem("shopping");
   };
   return (
     <>

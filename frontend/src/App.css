@@ -359,3 +359,26 @@ button:hover {
 .Login-input button:hover {
   opacity: 0.85;
 }
+
+.to-Register {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.to-Register h3 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.to-Register p {
+  font-size: 14px;
+  color: #007bff; /* 青文字 */
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.to-Register p:hover {
+  text-decoration: underline;
+  color: #0056b3; /* 少し濃い青に */
+}
