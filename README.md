@@ -1,7 +1,7 @@
 ### Afro kitchen
 
-- アプリ URL:
-- GitHub リポジトリ:
+- アプリ URL: https://newrecipe-app-front.onrender.com/
+- GitHub リポジトリ: https://github.com/uk-code4610/NEWrecipe-app
 
 ---
 
