@@ -28,11 +28,6 @@ print("EXISTS BEFORE :", os.path.exists(db_path))
 print("EXISTS AFTER  :", os.path.exists(db_path))
 
 
-@app.route("/")  # ルートURL（ホーム）にアクセスしたときの処理
-def home():
-    return render_template("index.html", recipes=[])
-
-
 @app.route("/static/images/<path:filename>")
 def serve_image(filename):
     return send_from_directory("static/images", filename)
