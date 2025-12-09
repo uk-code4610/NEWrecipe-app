@@ -54,7 +54,7 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
           <input
             type="text"
             name="username"
-            placeholder="10文字以内"
+            placeholder="4文字以上10文字以内で入力してください"
             value={username}
             onChange={changeName}
           />
@@ -62,7 +62,7 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
           <input
             type="password"
             name="password"
-            placeholder="16文字以内"
+            placeholder="6文字以上16文字以内で入力してください"
             value={password}
             onChange={changePass}
           />

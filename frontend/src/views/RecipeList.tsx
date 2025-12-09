@@ -26,7 +26,9 @@ const RecipeList = () => {
                   <p>調理時間目安:{result.time_min}分</p>
                 </div>
               ))
-            : doSearch && "レシピが見つかりませんでした"}
+            : doSearch && (
+                <p className="no-results">レシピが見つかりませんでした</p>
+              )}
         </div>
       )}
     </>

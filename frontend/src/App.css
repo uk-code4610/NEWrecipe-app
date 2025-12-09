@@ -100,6 +100,7 @@ button:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   transition: transform 0.2s, box-shadow 0.2s;
+  align-items: center;
 }
 
 .recipe-item img {
@@ -344,6 +345,7 @@ button:hover {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  background: white;
 }
 
 .Login-input button {
@@ -381,4 +383,14 @@ button:hover {
 .to-Register p:hover {
   text-decoration: underline;
   color: #0056b3; /* 少し濃い青に */
+}
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: white; /* タイトルと同じ色 */
+  font-size: 24px;
+  font-weight: 700; /* もっと太く */
+  font-family: inherit;
+  margin-top: 40px;
+  padding: 20px;
 }

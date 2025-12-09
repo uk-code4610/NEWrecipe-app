@@ -40,8 +40,9 @@ const FavoriteList = () => {
     <>
       {currentView === "favoriteList" && (
         <div className="recipe-list">
-          {(!Array.isArray(favoriteRecipe) || favoriteRecipe.length === 0) &&
-            "お気に入りが登録されていません"}
+          {(!Array.isArray(favoriteRecipe) || favoriteRecipe.length === 0) && (
+            <p className="no-results">お気に入りが登録されていません</p>
+          )}
           {Array.isArray(favoriteRecipe) &&
             favoriteRecipe.length > 0 &&
             favoriteRecipe
