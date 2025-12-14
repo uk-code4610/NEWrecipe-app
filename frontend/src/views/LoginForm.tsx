@@ -8,6 +8,7 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const changeName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
   };
@@ -15,10 +16,12 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
     setPassword(e.target.value);
   };
   const loginBtn = () => {
+    if (isLoading) return;
     if (!username || !password) {
       setMessage("入力してください");
       return;
     }
+    setIsLoading(true);
     fetch("https://new-afro-kitchen.onrender.com/api/login", {
       method: "POST",
       mode: "cors",
@@ -34,10 +37,12 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
       .then((data) => {
         localStorage.setItem("has_account", "true");
         setMessage(data.message);
+        setIsLoading(false);
         setIsLoggedIn(true);
         setCurrentView("list");
       })
       .catch((error) => {
+        setIsLoading(false);
         setMessage("ログインに失敗しました");
       });
     setUsername("");
@@ -66,7 +71,9 @@ const LoginForm = ({ setIsLoggedIn }: Props) => {
             value={password}
             onChange={changePass}
           />
-          <button onClick={loginBtn}>ログイン</button>
+          <button onClick={loginBtn} disabled={isLoading}>
+            {isLoading ? "ログイン中..." : "ログイン"}
+          </button>
           <div className="to-Register">
             <h3>アカウントをお持ちではないですか？</h3>
             <p onClick={() => setCurrentView("register")}>新規登録する</p>
