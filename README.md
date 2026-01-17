@@ -63,7 +63,7 @@ React + TypeScript によるフロントエンド刷新、ユーザー認証機�
   - Flask-CORS
   - Flask-Bcrypt
   - Flask-SQLAlchemy
-- SQLite（開発環境）
+- SQLite（開発・デプロイ環境：volumeで永続化）
 
 ### インフラ・CI
 
